@@ -37,4 +37,8 @@ public class WiseSayingService {
         repository.update(wiseSaying);
     }
 
+    public void build() {
+        repository.build();
+    }
+
 }

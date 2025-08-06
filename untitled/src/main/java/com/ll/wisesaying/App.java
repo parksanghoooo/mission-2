@@ -53,6 +53,10 @@ public class App {
 
                 controller.update(id);
             }
+            // 빌드
+            else if (cmd.equals(Command.BUILD)) {
+                controller.build();
+            }
 
         }
 

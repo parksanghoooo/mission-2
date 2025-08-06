@@ -67,6 +67,10 @@ public class WiseSayingRepository {
         save(wiseSaying);
     }
 
+    public void build() {
+        saveAll();
+    }
+
     private void save(WiseSaying wiseSaying) {
         try {
             // 개별 파일 저장
