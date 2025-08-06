@@ -53,22 +53,18 @@ public class WiseSayingRepository {
         return Optional.empty();
     }
 
-    public boolean deleteById(long id) {
-        Optional<WiseSaying> optional = findById(id);
-
-        if (optional.isEmpty()) {
-            return false;
-        }
-
-        wiseSayings.remove(optional.get());
+    public void deleteById(WiseSaying wiseSaying) {
+        wiseSayings.remove(wiseSaying);
 
         try {
-            Files.deleteIfExists(getWiseSayingFilePath(id));
+            Files.deleteIfExists(getWiseSayingFilePath(wiseSaying.getId()));
         } catch (IOException e) {
             throw new RuntimeException(ErrorMessage.FAIL_TO_DELETE_FILE, e);
         }
+    }
 
-        return true;
+    public void update(WiseSaying wiseSaying) {
+        save(wiseSaying);
     }
 
     private void save(WiseSaying wiseSaying) {

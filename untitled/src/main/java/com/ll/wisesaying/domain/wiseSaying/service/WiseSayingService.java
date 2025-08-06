@@ -23,14 +23,18 @@ public class WiseSayingService {
         return repository.findAll();
     }
 
-    public boolean isExistById(long id) {
-        Optional<WiseSaying> optional = repository.findById(id);
-
-        return optional.isPresent();
+    public void deleteById(WiseSaying wiseSaying) {
+        repository.deleteById(wiseSaying);
     }
 
-    public boolean deleteById(long id) {
-        return repository.deleteById(id);
+    public Optional<WiseSaying> findById(long id) {
+        return repository.findById(id);
+    }
+
+    public void update(WiseSaying wiseSaying, String newContent, String newAuthor) {
+        wiseSaying.setContent(newContent);
+        wiseSaying.setAuthor(newAuthor);
+        repository.update(wiseSaying);
     }
 
 }

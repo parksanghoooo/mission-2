@@ -6,7 +6,9 @@ import com.ll.wisesaying.global.constant.ErrorMessage;
 import com.ll.wisesaying.global.constant.Message;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class WiseSayingController {
 
@@ -33,14 +35,34 @@ public class WiseSayingController {
     }
 
     public void delete(long id) {
-        if (service.isExistById(id))
+        Optional<WiseSaying> optionalWiseSaying = service.findById(id);
+        if (optionalWiseSaying.isEmpty()) {
             System.out.printf(ErrorMessage.NOT_EXIST_WISE_SAYING, id);
+            return;
+        }
 
-        boolean result = service.deleteById(id);
-        if (result)
-            System.out.printf(Message.DELETE_SUCCESS, id);
-        else
+        service.deleteById(optionalWiseSaying.get());
+        System.out.printf(Message.DELETE_SUCCESS, id);
+    }
+
+    public void update(long id) throws IOException {
+        Optional<WiseSaying> optionalWiseSaying = service.findById(id);
+        if (optionalWiseSaying.isEmpty()) {
             System.out.printf(ErrorMessage.NOT_EXIST_WISE_SAYING, id);
+            return;
+        }
+
+        WiseSaying wiseSaying = optionalWiseSaying.get();
+
+        System.out.printf(Message.BEFORE_CONTENT, wiseSaying.getContent());
+        System.out.print(Message.INPUT_CONTENT);
+        String newContent = br.readLine().trim();
+
+        System.out.printf(Message.BEFORE_AUTHOR, wiseSaying.getAuthor());
+        System.out.print(Message.INPUT_AUTHOR);
+        String newAuthor = br.readLine().trim();
+
+        service.update(wiseSaying, newContent, newAuthor);
     }
 
 }

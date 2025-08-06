@@ -42,10 +42,16 @@ public class App {
                 controller.getAllWiseSayings();
             }
             // 삭제
-            else if (cmd.equals(Command.DELETE)) {
+            else if (cmd.startsWith(Command.DELETE)) {
                 long id = extractId(cmd);
 
                 controller.delete(id);
+            }
+            // 수정
+            else if (cmd.startsWith(Command.UPDATE)) {
+                long id = extractId(cmd);
+
+                controller.update(id);
             }
 
         }
