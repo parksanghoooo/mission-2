@@ -37,6 +37,10 @@ public class App {
 
                 controller.create(content, author);
             }
+            // 목록
+            else if (cmd.equals(Command.LIST)) {
+                controller.getAllWiseSayings();
+            }
 
         }
 

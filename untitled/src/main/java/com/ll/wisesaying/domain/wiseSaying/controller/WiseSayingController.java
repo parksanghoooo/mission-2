@@ -5,6 +5,7 @@ import com.ll.wisesaying.domain.wiseSaying.service.WiseSayingService;
 import com.ll.wisesaying.global.constant.Message;
 
 import java.io.BufferedReader;
+import java.util.List;
 
 public class WiseSayingController {
 
@@ -19,6 +20,15 @@ public class WiseSayingController {
     public void create(String content, String author) {
         WiseSaying saved = service.create(content, author);
         System.out.printf(Message.REGISTER_SUCCESS, saved.getId());
+    }
+
+    public void getAllWiseSayings() {
+        List<WiseSaying> allWiseSayings = service.findAll();
+
+        System.out.println(Message.LIST_HEADER);
+        for (WiseSaying wiseSaying : allWiseSayings) {
+            System.out.printf(Message.LIST_ROW_FORMAT, wiseSaying.getId(), wiseSaying.getAuthor(), wiseSaying.getContent());
+        }
     }
 
 }
