@@ -13,4 +13,8 @@ public class Message {
     // 등록 관련
     public static final String REGISTER_SUCCESS = "%d번 명언이 등록되었습니다.\n";
 
+    // 목록 관련
+    public static final String LIST_HEADER = "번호 / 작가 / 명언\n----------------------";
+    public static final String LIST_ROW_FORMAT = "%d / %s / %s\n";
+
 }
