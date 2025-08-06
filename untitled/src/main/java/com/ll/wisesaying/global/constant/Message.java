@@ -17,4 +17,7 @@ public class Message {
     public static final String LIST_HEADER = "번호 / 작가 / 명언\n----------------------";
     public static final String LIST_ROW_FORMAT = "%d / %s / %s\n";
 
+    // 삭제 관련
+    public static final String DELETE_SUCCESS = "%d번 명언이 삭제되었습니다.\n";
+
 }
