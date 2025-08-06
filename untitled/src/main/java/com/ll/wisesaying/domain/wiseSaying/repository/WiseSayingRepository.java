@@ -8,8 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.ll.wisesaying.global.db.config.DBConfig.LAST_ID_FILE;
 import static com.ll.wisesaying.global.db.config.DBConfig.getWiseSayingFilePath;
@@ -31,21 +30,63 @@ public class WiseSayingRepository {
         WiseSaying wiseSaying = new WiseSaying(id, content, author);
         wiseSayings.add(wiseSaying);
 
-        saveWiseSaying(wiseSaying);
+        save(wiseSaying);
         saveLastId(id);
 
         return wiseSaying;
     }
 
     public List<WiseSaying> findAll() {
-        List<WiseSaying> descWiseSayings = new ArrayList<>(wiseSayings); // 데이터 복제 (안전 복사)
+        List<WiseSaying> descWiseSayings = new ArrayList<>(wiseSayings);
         descWiseSayings.sort((a, b) -> Long.compare(b.getId(), a.getId()));
         return descWiseSayings;
     }
 
-    private void saveWiseSaying(WiseSaying wiseSaying) {
+    public Optional<WiseSaying> findById(long id) {
+        List<WiseSaying> allWiseSayings = new ArrayList<>(wiseSayings);
+
+        for (WiseSaying wiseSaying : allWiseSayings) {
+            if (wiseSaying.getId() == id)
+                return Optional.of(wiseSaying);
+        }
+
+        return Optional.empty();
+    }
+
+    public boolean deleteById(long id) {
+        Optional<WiseSaying> optional = findById(id);
+
+        if (optional.isEmpty()) {
+            return false;
+        }
+
+        wiseSayings.remove(optional.get());
+
         try {
+            Files.deleteIfExists(getWiseSayingFilePath(id));
+        } catch (IOException e) {
+            throw new RuntimeException(ErrorMessage.FAIL_TO_DELETE_FILE, e);
+        }
+
+        return true;
+    }
+
+    private void save(WiseSaying wiseSaying) {
+        try {
+            // 개별 파일 저장
             objectMapper.writeValue(getWiseSayingFilePath(wiseSaying.getId()).toFile(), wiseSaying);
+
+            // 전체 리스트를 기반으로 data.json 갱신
+            saveAll();
+        } catch (IOException e) {
+            throw new RuntimeException(ErrorMessage.FAIL_TO_CREATE_FILE, e);
+        }
+    }
+
+    public void saveAll() {
+        try {
+            Path dataJsonPath = getWiseSayingFilePath(0).getParent().resolve("data.json");
+            objectMapper.writeValue(dataJsonPath.toFile(), wiseSayings);
         } catch (IOException e) {
             throw new RuntimeException(ErrorMessage.FAIL_TO_CREATE_FILE, e);
         }
@@ -60,47 +101,39 @@ public class WiseSayingRepository {
     }
 
     private void loadAll() {
-        wiseSayings.clear(); // 항상 초기화
+        Path dir = getWiseSayingFilePath(0).getParent();
+        Path dataJsonPath = dir.resolve("data.json");
+
+        wiseSayings.clear();
+
+        File[] jsonFiles = dir.toFile().listFiles((d, name) -> name.matches("\\d+\\.json"));
+        if (jsonFiles == null || jsonFiles.length == 0) {
+            // 아무런 명언 파일도 없다면 빈 리스트로 유지 + data.json 덮어쓰기
+            try {
+                objectMapper.writeValue(dataJsonPath.toFile(), wiseSayings);
+            } catch (IOException e) {
+                throw new RuntimeException(ErrorMessage.FAIL_TO_CREATE_FILE, e);
+            }
+            return;
+        }
+
+        List<WiseSaying> loadedList = new ArrayList<>();
+        for (File file : jsonFiles) {
+            try {
+                WiseSaying ws = objectMapper.readValue(file, WiseSaying.class);
+                loadedList.add(ws);
+            } catch (IOException e) {
+                throw new RuntimeException(ErrorMessage.FAIL_TO_LOAD_FILE, e);
+            }
+        }
+
+        wiseSayings.addAll(loadedList);
+
+        // 항상 data.json 최신화
         try {
-            Files.createDirectories(getWiseSayingFilePath(0).getParent());
-            Path dir = getWiseSayingFilePath(0).getParent();
-            Path dataJsonPath = dir.resolve("data.json");
-
-            if (Files.exists(dataJsonPath)) {
-                // 1. data.json 로드
-                List<WiseSaying> list = objectMapper.readValue(
-                        dataJsonPath.toFile(),
-                        new TypeReference<>() {}
-                );
-                wiseSayings.addAll(list);
-                return;
-            }
-
-            // 2. data.json 없고, {id}.json 파일들만 존재하면
-            File[] jsonFiles = dir.toFile().listFiles((d, name) ->
-                    name.matches("\\d+\\.json")
-            );
-
-            if (jsonFiles != null && jsonFiles.length > 0) {
-                List<WiseSaying> loadedList = new ArrayList<>();
-                for (File file : jsonFiles) {
-                    try {
-                        WiseSaying ws = objectMapper.readValue(file, WiseSaying.class);
-                        loadedList.add(ws);
-                    } catch (IOException e) {
-                        System.err.printf(ErrorMessage.FAIL_TO_LOAD_FILE, file.getName());
-                    }
-                }
-
-                wiseSayings.addAll(loadedList);
-
-                // data.json 생성
-                objectMapper.writeValue(dataJsonPath.toFile(), loadedList);
-            }
-
-            // 3. 아무것도 없으면 빈 리스트
+            objectMapper.writeValue(dataJsonPath.toFile(), loadedList);
         } catch (IOException e) {
-            throw new RuntimeException(ErrorMessage.FAIL_TO_LOAD_FILE, e);
+            throw new RuntimeException(ErrorMessage.FAIL_TO_CREATE_FILE, e);
         }
     }
 

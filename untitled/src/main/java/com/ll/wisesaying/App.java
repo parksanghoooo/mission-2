@@ -41,9 +41,35 @@ public class App {
             else if (cmd.equals(Command.LIST)) {
                 controller.getAllWiseSayings();
             }
+            // 삭제
+            else if (cmd.equals(Command.DELETE)) {
+                long id = extractId(cmd);
+
+                controller.delete(id);
+            }
 
         }
 
+    }
+
+    private long extractId(String cmd) {
+        int qIdx = cmd.indexOf('?');
+        if (qIdx == -1 || qIdx == cmd.length() - 1) return -1;
+
+        String queryPart = cmd.substring(qIdx + 1); // "id=1"
+        int eqIdx = queryPart.indexOf('=');
+        if (eqIdx == -1) return -1;
+
+        String key = queryPart.substring(0, eqIdx); // "id"
+        String value = queryPart.substring(eqIdx + 1); // "1"
+
+        if (!key.equals("id")) return -1;
+
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
 }
