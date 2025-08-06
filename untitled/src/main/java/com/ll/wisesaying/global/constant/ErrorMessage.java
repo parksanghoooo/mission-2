@@ -15,5 +15,6 @@ public class ErrorMessage {
     public static final String FAIL_TO_CREATE_FILE = "[파일 생성 실패]";
     public static final String FAIL_TO_LOAD_FILE = "[파일 로딩 실패]";
     public static final String FAIL_TO_DELETE_FILE = "[파일 삭제 실패]";
+    public static final String FAIL_TO_BUILD_FILE = "[파일 빌드 실패]";
 
 }
