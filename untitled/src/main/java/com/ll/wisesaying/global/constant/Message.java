@@ -20,4 +20,8 @@ public class Message {
     // 삭제 관련
     public static final String DELETE_SUCCESS = "%d번 명언이 삭제되었습니다.\n";
 
+    // 수정 관련
+    public static final String BEFORE_CONTENT = "명언(기존) : %s\n";
+    public static final String BEFORE_AUTHOR = "작가(기존) : %s\n";
+
 }
